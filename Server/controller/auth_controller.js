@@ -1,6 +1,6 @@
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
-import usermodel from '../model/mongobd_usermodel.js';
+import {usermodel} from '../model/mongobd_usermodel.js';
 import transporter from '../config/nodemailer.js';
 
 // for register function----

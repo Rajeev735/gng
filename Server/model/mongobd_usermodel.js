@@ -1,4 +1,7 @@
 import mongoose from "mongoose";
+
+
+
 const userSchema = new mongoose.Schema({
     name: {
         type: String, 
@@ -25,49 +28,36 @@ const userSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
+
     resetotp: {
         type: String,
         default: ''
     },
+
     resetotpexpireAt: { 
         type: Number,
         default: 0
     },
-    city:{
-        type:String,
-     
-        default:""
-      },
-      Address:{
-        type:String,
-        
-        default:""
-      },
-      pin:{
-        type:String,
 
-        default:""
-      },
-      phone:{
-        type:String,
-    
-        default:""
-      },
-      alternatephone:{
-        type:String,
+    phone:{
+      type: Number,
+     
+    },
+
+    alternatephone:{
+      type: Number
       
-        default:""
-        
-      },
-      state:{
-        type:String,
+    }
    
-        default:""
-        
-      },
+    
 });
 
-// Corrected model creation logic
+
+
+
+
+
 const usermodel = mongoose.models.user || mongoose.model('user', userSchema);
 
-export default usermodel;
+
+export { usermodel};

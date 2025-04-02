@@ -10,9 +10,10 @@ import TextField from "@mui/material/TextField";
 
 import { Button } from "@mui/material";
 import { AppContext } from "../context/Appcontext";
+import { useNavigate } from "react-router-dom";
 
 function MyProfile() {
-
+  const navigate=useNavigate();
   const [isOpenSummary, setOpenSummary] = useState(0);
 
   const [edit,setedit] =useState(false)
@@ -31,10 +32,7 @@ function MyProfile() {
   const [userprofile, setuserprofile] = useState({
     name: "",
     phone: "",
-    Address: "",
-    city: "",
-    state: "",
-    pin: "",
+   
     alternatephone: "",
     email: "",
   });
@@ -53,10 +51,7 @@ function MyProfile() {
             setuserprofile({
               name: data.userdata?.name ,
               phone: data.userdata?.phone ,
-              Address: data.userdata?.Address,
-              city: data.userdata?.city ,
-              state: data.userdata?.state ,
-              pin: data.userdata?.pin ,
+            
               alternatephone: data.userdata?.alternatephone ,
               email: data.userdata?.email 
             });
@@ -81,12 +76,8 @@ function MyProfile() {
 
    const uploaduserprofile = async () => {
     try {
-      const missingFields = Object.entries(userprofile).filter(([key, value]) => !value.trim());
-
-      if (missingFields.length > 0) {
-        toast.error("Data Missing: Please fill all required fields before saving!");
-        return;
-      }
+     
+      
         const { data } = await axios.post(backendurl + "/api/user/update-profile", userprofile,
           
         );
@@ -105,12 +96,7 @@ function MyProfile() {
 
   useEffect(()=>{
     if(!userData){
-      setuserprofile({
-
-       
-
-       
-    });
+      setuserprofile({});
     return
     }
      
@@ -140,35 +126,23 @@ function MyProfile() {
                 <TextField className="w-full lg:w-[50%]" label="Full Name" size="small" disabled={!edit} variant="filled" value={userprofile.name} onChange={(e) => setuserprofile({ ...userprofile, name: e.target.value })}  />
                  <TextField className="w-full lg:w-[50%] lg:mt-0 mt-3" label="Phone Number" size="small" disabled={!edit} variant="filled"  value={userprofile.phone}  onChange={(e) => {
                     const inputValue = e.target.value; // Define the input value
-                    if (/^\d{0,15}$/.test(inputValue)) { // Allow only numbers
+                    if (inputValue === "" || /^\d{0,10}$/.test(inputValue)) { // Allow only numbers
                       setuserprofile({ ...userprofile, phone: inputValue });
                     }
                 }} />
                
               </div>
-              <h6 className="pt-3 mb-2 px-1 text-[13px] font-[500]">Street Address *</h6>
-               <TextField className="w-full" label="Address (Area and Street)" size="small" variant="filled" disabled={!edit} value={userprofile.Address} onChange={(e) => setuserprofile({ ...userprofile, Address: e.target.value })} />
+           
              
-              <h6 className="pt-3 mb-2 px-1 text-[13px] font-[500]">City and State *</h6>
+             
+              <h6 className="pt-3 mb-2 px-1 text-[13px] font-[500]"> Alternate Phone *</h6>
               <div className="lg:flex items-center gap-3">
-                <TextField className="w-full lg:w-[50%]" label="City/District/Town" size="small" variant="filled" disabled={!edit}  value={userprofile.city}  onChange={(e) => setuserprofile({ ...userprofile, city: e.target.value })} />
-                
-                <TextField className="w-full lg:w-[50%] lg:mt-0 mt-3" label="State" size="small" variant="filled" disabled={!edit}  value={userprofile.state} onChange={(e) => setuserprofile({ ...userprofile, state: e.target.value })} />
-                
-              </div>
-              <h6 className="pt-3 mb-2 px-1 text-[13px] font-[500]">Pincode and Alternate Phone *</h6>
-              <div className="lg:flex items-center gap-3">
-                <TextField className="w-full lg:w-[50%]" label="Pincode" size="small" variant="filled" disabled={!edit}  value={userprofile.pin}  onChange={(e) => {
-                    const inputValue = e.target.value; // Define the input value
-                    if (/^\d{0,6}$/.test(inputValue)) { // Allow only numbers
-                      setuserprofile({ ...userprofile, pin: inputValue });
-                    }
-                }} />
+             
                 
                 <TextField className="w-full lg:w-[50%] lg:mt-0 mt-3" label="Alternate Number" size="small" variant="filled"
                   value={userprofile.alternatephone} disabled={!edit} onChange={(e) => {
                     const inputValue = e.target.value; // Define the input value
-                    if (/^\d*$/.test(inputValue)) { // Allow only numbers
+                    if(inputValue === "" || /^\d{0,10}$/.test(inputValue)) { // Allow only numbers
                       setuserprofile({ ...userprofile, alternatephone: inputValue });
                     }
                 }} />
@@ -178,9 +152,10 @@ function MyProfile() {
             
               <TextField className="w-full" label="Email Address" size="small" variant="filled" disabled={true} value={userprofile.email}/>
               <div className="btns flex justify-end mx-1 mt-4 w-full gap-3">
-                <Button variant="contained" className="w-full !bg-[#fb541b] !h-[45px]">
-                  Deliver Here
-                </Button>
+              <Button onClick={() => navigate("/address")} variant="contained" className="w-full !bg-[#fb541b] !h-[45px]">
+          Add Delivery Address
+            </Button>
+
                 {
                 !edit?
                 <Button onClick={()=>(setedit(true))} variant="contained" className="w-full !bg-[#fb541b] !h-[45px]">

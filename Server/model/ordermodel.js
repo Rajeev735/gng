@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 
 const orderschema = new mongoose.Schema({
 
-  userId:{type:String, required:true},
+ 
   sellerid:{type:String, required:true},
 
   items:[{

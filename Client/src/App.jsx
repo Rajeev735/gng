@@ -13,6 +13,7 @@ import Cartpage from "./Components/Cart Page/Cartpage.jsx";
 import Orders from "./Components/Orders/Orders.jsx";
 import Wishlist from "./Components/Wish List/Wishlist.jsx";
 import Checkout from "./Components/Checkout/Checkout.jsx";
+import Delivery from "./Components/deliveryaddress/delivery.jsx";
 
 function App() {
   return (
@@ -30,6 +31,7 @@ function App() {
         <Route path="/productDetails/:id" element={<ProductDetail/>}/>
         <Route path="/cartlist" element={<Cartpage/>}/>
         <Route path="/checkout" element={<Checkout/>}/>
+        <Route path="/address" element={<Delivery/>}/>
       </Routes>
       <Footer/>
     </>

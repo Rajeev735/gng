@@ -1,8 +1,8 @@
-import addressmodel from "../model/addressmodel.js";
-import usermodel from "../model/mongobd_usermodel.js";
+import {addressmodel} from "../model/addressmodel.js";
+import {usermodel} from "../model/mongobd_usermodel.js";
 import ordermodel from "../model/ordermodel.js";
+import validator from "validator";
 
-//Get all user data after register or login all of aperaton------
 export const getuserdeta = async (req,res)=>{
     try {
         const {userId} = req.body;
@@ -62,24 +62,21 @@ export const getprofile = async (req, res) => {
         return res.status(401).json({ success: false, message: "Unauthorized request" });
       }
   
-      const { name, phone, Address, city, alternatephone, pin, state } = req.body;
-  
-      if (!name || !phone || !Address || !city || !pin || !state   ) {
+      const { name, phone, alternatephone,email } = req.body;
+     
+      if (!name || !phone ||!email ) {
         return res.status(400).json({ success: false, message: "Data Missing" });
       }
-    if(phone.length!==10){
-      return res.json({message:"Enter valid phone number"})
-    }
-
-    if(alternatephone){
-      if( alternatephone.length!==10){
-        return res.json({message:"Enter valid alternate phone number"})
+      
+      if (!validator.isEmail(email)) {
+        return res.status(400).json({ success: false, message: "Invalid email format" });
       }
-    } 
+   
+      
 
       const updatedUser = await usermodel.findByIdAndUpdate(
         userId,
-        { name, phone, Address, city, alternatephone, pin, state },
+        { name, phone, alternatephone,  },
         { new: true } // ✅ Returns the updated document
       );
   
@@ -191,11 +188,26 @@ export const trackorder =async(req,res)=>{
 
 export const addAddress=async(req,res)=>{
   try{
-      const {userId,city,state,name,email,pin,address}=req.body;
-      if (!userId || !city || !state || !name || !email || !pin || !address ) {
+      const {userId,city,state,name,email,pin,address,phone,label,alternatephone}=req.body;
+      
+      if (!userId || !city || !state || !name || !email || !pin || !address || !phone || !label) {
         return res.status(400).json({ success: false, message: "data missing" });
     }
-    const newaddress = new addressmodel({ userId,city,state,name,email,pin,address });
+    if (!validator.isEmail(email)) {
+      return res.status(400).json({ success: false, message: "Invalid email format" });
+    }
+    const existinglabel= await addressmodel.findOne({userId,label})
+
+    if (existinglabel) {
+      return res.status(400).json({ success: false, message: "Label already exists. Choose a different one." });
+    }
+
+    const existingemail= await addressmodel.findOne({userId,label})
+
+    if (existingemail) {
+      return res.status(400).json({ success: false, message: "email already exists. Choose a different one." });
+    }
+    const newaddress = new addressmodel({ userId,city,state,name,email,pin,address,phone ,alternatephone,label});
       await newaddress.save();
       return res.status(200).json({success:true,address:newaddress})
   }
@@ -210,9 +222,9 @@ export const fetchAddress=async(req,res)=>{
       if (!userId) {
         return res.status(400).json({ success: false, message: "userId is required" });
     }
-    const data = await addressmodel.findById(userId);
+    const address = await addressmodel.find({userId});
     
-        return res.status(200).json({success:true,data:data})
+        return res.status(200).json({success:true,address})
       
       
   }
@@ -220,3 +232,76 @@ export const fetchAddress=async(req,res)=>{
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 }
+
+
+
+export const deleteAddress = async (req, res) => {
+    try {
+        const { addressId } = req.params; // Get the address ID from URL params
+
+        if (!addressId) {
+            return res.status(400).json({ success: false, message: "Address ID is required" });
+        }
+
+        const deletedAddress = await addressmodel.findByIdAndDelete(addressId);
+
+        if (!deletedAddress) {
+            return res.status(404).json({ success: false, message: "Address not found" });
+        }
+
+        res.status(200).json({ success: true, message: "Address deleted successfully" });
+    } catch (error) {
+        console.error("Error deleting address:", error);
+        res.status(500).json({ success: false, message: "Internal Server Error" });
+    }
+};
+
+export const updateaddress = async (req, res) => {
+  try {
+    const {addressId} = req.params; // ✅ Extract user ID from authenticated request
+   
+    if (!addressId) {
+      return res.status(401).json({ success: false, message: "Unauthorized request" });
+    }
+    const {userId}=req.body;
+    if (!userId) {
+      return res.status(400).json({ success: false, message: "userId is required" });
+  }
+
+    const { name, phone, alternatephone,email,city,state,address,pin,label } = req.body;
+
+    if (!name || !phone ||!email || !city || !state || !address || !pin || !label) {
+      return res.status(400).json({ success: false, message: "Data Missing" });
+    }
+    const existinglabel= await addressmodel.findOne({userId,label})
+
+    if (existinglabel) {
+      return res.status(400).json({ success: false, message: "Label already exists. Choose a different one." });
+    }
+
+    const existingemail= await addressmodel.findOne({userId,label})
+
+    if (existingemail) {
+      return res.status(400).json({ success: false, message: "email already exists. Choose a different one." });
+    }
+    if (!validator.isEmail(email)) {
+      return res.status(400).json({ success: false, message: "Invalid email format" });
+    }
+  
+
+    const updatedaddress = await addressmodel.findByIdAndUpdate(
+      addressId,
+      { name, phone, alternatephone,email,city,state,address,pin,label},
+      { new: true } // ✅ Returns the updated document
+    );
+
+    if (!updatedaddress) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    return res.status(200).json({ success: true, message: "Profile Updated", address: updatedaddress });
+
+  } catch (e) {
+    return res.status(500).json({ success: false, message: e.message });
+  }
+};
